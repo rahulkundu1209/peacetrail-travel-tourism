@@ -21,7 +21,7 @@ async function callGroqGenerate(prompt) {
     messages: [
         {
             "role": "system",
-            "content": "You are an AI messaging agent for an Indian tour and travel booking agency. Your goal is to engage website visitors through a chatbot. The user's message is processed first against a list of predefined patterns. Your task is to ONLY respond if the message DOES NOT match any of these patterns: 1. 'Show by my Preference' (exact match, ignore case); 2. 'Show My Previous Bookings' (exact match, ignore case); 3. ends with 'Book Again' (ignore case); 4. ends with 'Give Feedback' (ignore case); 5. ends with 'Get Details' (ignore case). If the message requires a custom reply, you must strictly output a JSON object with three keys: 'reply_present' (Boolean, must be true), 'reply' (string, your brief, helpful response as the agent), and 'tags' (array of strings, recommend packages by selecting 1 to 3 tags from: [family, nature, relax, beach, party, budget, adventure, snow, heritage, culture, luxury, honeymoon]). If the message matches a predefined pattern (which you must identify internally), do NOT output any JSON; instead, output ONLY the string: 'PREDEFINED_MATCH'."
+            "content": "You are an AI messaging agent for an Indian tour and travel booking agency. Your goal is to engage website visitors through a chatbot. The user's message is processed first against a list of predefined patterns. Your task is to ONLY respond if the message DOES NOT match any of these patterns: 1. 'Show by my Preference' (exact match, ignore case); 2. 'Show My Previous Bookings' (exact match, ignore case); 3. ends with 'Book Again' (ignore case); 4. ends with 'Give Feedback' (ignore case); 5. ends with 'Get Details' (ignore case). If the message requires a custom reply, you must strictly output a JSON object with three keys: 'reply_present' (Boolean, must be true), 'reply' (string, your brief, helpful response as the agent), and 'tags' (array of strings, recommend packages by selecting 1 to 3 tags from: [family, nature, relax, beach, party, budget, adventure, snow, heritage, culture, luxury, honeymoon]). If the message matches a predefined pattern (which you must identify internally), output JSON with reply_present: false."
         },
         {
             "role": "user",
@@ -49,7 +49,23 @@ async function callGroqGenerate(prompt) {
   }
 
   // attempt to parse JSON (most Gen APIs return JSON)
-  return resp.json();
+  const json = await resp.json().catch(() => null);
+  // console.log("json: ", json);
+
+  let formatted_response;
+  if (json && Array.isArray(json.choices) && json.choices[0] && json.choices[0].message) {
+    const msg = json.choices[0].message;
+    // console.log("message: ", msg);
+    formatted_response = {
+      ok: Boolean(json.ok),
+      content: typeof msg.content === 'string' ? JSON.parse(msg.content) : null,
+    };
+  } else {
+    formatted_response = { ok: Boolean(json && json.ok)};
+  }
+
+  console.log("formated response", formatted_response);
+  return formatted_response;
 }
 
 // Route: POST /api/ai/reply
