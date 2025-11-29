@@ -114,6 +114,7 @@ app.get("/api/packages/:id", async (req, res) => {
 
 app.post('/api/ai/reply', express.json(), async (req, res) => {
   try {
+    console.log("Request ", req);
     console.log("Request Body", req.body);
     const { prompt } = req.body || {};
     console.log("prompt", prompt);
