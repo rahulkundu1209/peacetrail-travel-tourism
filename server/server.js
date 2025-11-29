@@ -114,7 +114,9 @@ app.get("/api/packages/:id", async (req, res) => {
 
 app.post('/api/ai/reply', express.json(), async (req, res) => {
   try {
+    console.log("Request Body", req.body);
     const { prompt } = req.body || {};
+    console.log("prompt", prompt);
     if (!prompt || typeof prompt !== 'string') {
       return res.status(400).json({ error: 'Missing or invalid "prompt" in request body' });
     }
