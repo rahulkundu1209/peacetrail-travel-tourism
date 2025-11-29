@@ -14,7 +14,6 @@ const GAS_URL = process.env.GAS_DATA_URL
 // Middleware
 app.use(cors())
 app.use(express.json())
-app.use(express.urlencoded({ extended: true }));
 
 // Mount AI reply router from CommonJS module `aireply.js`
 // `aireply.js` exports a function that accepts the express `app` and mounts routes.
@@ -80,7 +79,8 @@ const fetchFromGAS = async () => {
 app.get("/api/packages", async (req, res) => {
   try {
     const data = await fetchFromGAS()
-    res.json(data)
+    const pkgsData = transformPackageData(data);
+    res.json(pkgsData)
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
@@ -89,8 +89,9 @@ app.get("/api/packages", async (req, res) => {
 // GET featured packages only
 app.get("/api/packages/featured", async (req, res) => {
   try {
-    const packages = await fetchFromGAS()
-    const featured = packages.filter((pkg) => pkg.featured)
+    const data = await fetchFromGAS()
+    const pkgsData = transformPackageData(data);
+    const featured = pkgsData.filter((pkg) => pkg.featured)
     res.json(featured)
   } catch (error) {
     res.status(500).json({ error: error.message })
@@ -100,8 +101,9 @@ app.get("/api/packages/featured", async (req, res) => {
 // GET single package by ID
 app.get("/api/packages/:id", async (req, res) => {
   try {
-    const packages = await fetchFromGAS()
-    const pkg = packages.find((p) => p.id.toString() === req.params.id.toString())
+    const data = await fetchFromGAS()
+    const pkgsData = transformPackageData(data);
+    const pkg = pkgsData.find((p) => p.id.toString() === req.params.id.toString())
 
     if (!pkg) {
       return res.status(404).json({ error: "Package not found" })
@@ -115,8 +117,8 @@ app.get("/api/packages/:id", async (req, res) => {
 
 app.post('/api/ai/reply', express.json(), async (req, res) => {
   try {
-    console.log("Request ", req);
-    console.log("Request Body", req.body);
+    // console.log("Request Body", req);
+    // console.log("Request Body", req.body);
     const { prompt } = req.body || {};
     console.log("prompt", prompt);
     if (!prompt || typeof prompt !== 'string') {
