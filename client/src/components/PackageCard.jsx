@@ -2,14 +2,14 @@ import { Link } from "react-router-dom"
 import "./PackageCard.css"
 
 function PackageCard({ package: pkg }) {
-  const tags =
-    typeof pkg.tags === "string"
-      ? pkg.tags.split(",").map(t => t.trim()).filter(Boolean)
-      : Array.isArray(pkg.tags)
-      ? pkg.tags
-      : []
+  // const tags =
+  //   typeof pkg.tags === "string"
+  //     ? pkg.tags.split(",").map(t => t.trim()).filter(Boolean)
+  //     : Array.isArray(pkg.tags)
+  //     ? pkg.tags
+  //     : []
 
-  pkg.tags = tags
+  // pkg.tags = tags
   return (
     <div className="package-card">
       <div className="package-image">
@@ -25,7 +25,7 @@ function PackageCard({ package: pkg }) {
 
         <div className="package-tags">
           {pkg.tags &&
-            tags.map((tag, idx) => (
+            pkg.tags.map((tag, idx) => (
               <span key={idx} className="tag">
                 {tag}
               </span>

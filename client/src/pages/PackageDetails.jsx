@@ -24,6 +24,7 @@ function PackageDetails() {
       if (!response.ok) throw new Error("Package not found")
 
       const data = await response.json()
+      console.log(data);
       setPkg(data)
       setError(null)
     } catch (err) {
@@ -124,7 +125,7 @@ function PackageDetails() {
               <div className="section">
                 <h2 className="section-heading">Package Tags</h2>
                 <div className="tags-display">
-                  {pkg.tags && pkg.tags.split(",").map(t => t.trim()).filter(Boolean).map((tag, idx) => (
+                  {pkg.tags && pkg.tags.map((tag, idx) => (
                       <span key={idx} className="tag-badge">
                         {tag}
                       </span>
