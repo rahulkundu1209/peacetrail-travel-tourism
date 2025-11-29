@@ -2,6 +2,8 @@ import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import axios from "axios"
+import { createRequire } from 'module'
+import { callGroqGenerate } from "./aireply.js"
 
 dotenv.config()
 
@@ -12,6 +14,18 @@ const GAS_URL = process.env.GAS_DATA_URL
 // Middleware
 app.use(cors())
 app.use(express.json())
+
+// Mount AI reply router from CommonJS module `aireply.js`
+// `aireply.js` exports a function that accepts the express `app` and mounts routes.
+// const require = createRequire(import.meta.url)
+// try {
+//   const registerAiRoutes = require('./aireply.js')
+//   if (typeof registerAiRoutes === 'function') {
+//     registerAiRoutes(app)
+//   }
+// } catch (err) {
+//   console.warn('Could not load aireply router:', err && err.message ? err.message : err)
+// }
 
 // Simple in-memory cache
 let dataCache = null
@@ -110,6 +124,23 @@ app.get("/api/packages/:id", async (req, res) => {
     res.status(500).json({ error: error.message })
   }
 })
+
+app.post('/api/ai/reply', express.json(), async (req, res) => {
+  try {
+    const { prompt } = req.body || {};
+    if (!prompt || typeof prompt !== 'string') {
+      return res.status(400).json({ error: 'Missing or invalid "prompt" in request body' });
+    }
+
+    const result = await callGroqGenerate(prompt);
+    // Forward the provider response as-is. Adjust if you want a different shape.
+    res.json({ ok: true, provider: 'groq', result });
+  } catch (err) {
+    const message = err && err.message ? err.message : 'Unknown error';
+    const details = err && err.details ? err.details : undefined;
+    res.status(500).json({ ok: false, error: message, details });
+  }
+});
 
 // Health check endpoint
 app.get("/health", (req, res) => {
