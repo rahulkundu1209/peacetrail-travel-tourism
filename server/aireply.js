@@ -57,7 +57,7 @@ async function callGroqGenerate(prompt) {
     const msg = json.choices[0].message;
     // console.log("message: ", msg);
     formatted_response = {
-      ok: Boolean(json.ok),
+      status: "ok",
       content: typeof msg.content === 'string' ? JSON.parse(msg.content) : null,
     };
   } else {
@@ -68,25 +68,5 @@ async function callGroqGenerate(prompt) {
   return formatted_response;
 }
 
-// Route: POST /api/ai/reply
-// Body: { prompt: string, model?: string, extra?: object }
-// router.post('/api/ai/reply', express.json(), async (req, res) => {
-//   try {
-//     const { prompt } = req.body || {};
-//     if (!prompt || typeof prompt !== 'string') {
-//       return res.status(400).json({ error: 'Missing or invalid "prompt" in request body' });
-//     }
 
-//     const result = await callGroqGenerate(prompt, { model, extra });
-//     // Forward the provider response as-is. Adjust if you want a different shape.
-//     res.json({ ok: true, provider: 'groq', result });
-//   } catch (err) {
-//     const message = err && err.message ? err.message : 'Unknown error';
-//     const details = err && err.details ? err.details : undefined;
-//     res.status(500).json({ ok: false, error: message, details });
-//   }
-// });
-
-// Export a function that mounts the router on an express app.
-// In your server.js: require('./server/aireply')(app);
 export {callGroqGenerate};

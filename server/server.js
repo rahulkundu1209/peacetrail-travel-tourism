@@ -75,19 +75,6 @@ const fetchFromGAS = async () => {
   }
 }
 
-// Get cached data or fetch if cache is invalid
-// const getCachedData = async () => {
-//   if (dataCache && lastFetchTime && Date.now() - lastFetchTime < CACHE_DURATION) {
-//     console.log("[CACHE] Using cached data")
-//     return dataCache
-//   }
-
-//   console.log("[FETCH] Fetching fresh data from GAS")
-//   return await fetchFromGAS()
-// }
-
-// Routes
-
 // GET all packages
 app.get("/api/packages", async (req, res) => {
   try {
@@ -134,7 +121,7 @@ app.post('/api/ai/reply', express.json(), async (req, res) => {
 
     const result = await callGroqGenerate(prompt);
     // Forward the provider response as-is. Adjust if you want a different shape.
-    res.json({ ok: true, provider: 'groq', result });
+    res.json(result);
   } catch (err) {
     const message = err && err.message ? err.message : 'Unknown error';
     const details = err && err.details ? err.details : undefined;
