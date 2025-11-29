@@ -14,6 +14,7 @@ const GAS_URL = process.env.GAS_DATA_URL
 // Middleware
 app.use(cors())
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
 
 // Mount AI reply router from CommonJS module `aireply.js`
 // `aireply.js` exports a function that accepts the express `app` and mounts routes.
