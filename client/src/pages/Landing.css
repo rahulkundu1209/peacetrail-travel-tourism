@@ -7,7 +7,8 @@
   position: relative;
   height: 600px;
   background: linear-gradient(135deg, #d4633b 0%, #2d5f4f 100%);
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><path d="M0,300 Q300,200 600,300 T1200,300 L1200,600 L0,600 Z" fill="rgba(212,99,59,0.1)"/></svg>');
+  /* background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><path d="M0,300 Q300,200 600,300 T1200,300 L1200,600 L0,600 Z" fill="rgba(212,99,59,0.1)"/></svg>'); */
+  background-image: url('../assets/hero_bg.png');
   background-size: cover;
   background-position: center;
   display: flex;
@@ -22,7 +23,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  /* background: rgba(0, 0, 0, 0.3); */
 }
 
 .hero-content {
