@@ -11,30 +11,35 @@
 }
 
 .ai-recommendation-container {
-  padding: 10px;
-  margin-bottom: 8px;
-  display: flex;
-  flex-direction: column;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  width: 80%;
+  margin-left: 10%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .ai-recommendation-container h4 {
-  margin-left: 7%;
-  text-align: left;
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
   color: var(--text-primary);
 }
 
+.ai-recommendation-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .ai-recommendation-container input {
-  width: 80%;
-  padding: 12px;
+  flex: 1;
+  padding: 10px 12px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
-  margin-bottom: 12px;
   transition: border-color 0.3s ease;
-  margin-right: 4px;
 }
 
 .ai-recommendation-container input:focus {
@@ -51,11 +56,23 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
   transition: background-color 0.3s ease;
 }
 
 .ai-recommendation-button:hover {
   background-color: #b84e30;
+}
+
+.ai-recommendation-reply {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-left: 3px solid var(--primary-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .page-header h1 {

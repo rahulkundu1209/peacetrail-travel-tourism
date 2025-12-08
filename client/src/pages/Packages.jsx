@@ -97,6 +97,7 @@ function Packages() {
       setRecommendationResponse(null);
       return;
     }
+    setLoading(true);
     try {
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
       const response = await fetch(`${apiBaseUrl}/api/ai/recommendation`, {
@@ -111,11 +112,13 @@ function Packages() {
 
       const data = await response.json();
       setRecommendationResponse(data);
-      console.log("AI Recommendation:", data);
+      setAllPackages(data.content.packages);
+      // console.log("AI Recommendation:", data);
     } catch (err) {
       console.error("Error getting AI recommendation:", err)
       setRecommendationResponse({ error: err.message });
     }
+    setLoading(false);
   }
 
   // Extract unique locations and tags
@@ -132,18 +135,22 @@ function Packages() {
         </div>
         <div className="ai-recommendation-container">
           <h4>Get Personalized Recommendation</h4>
-          <section>
+          <section className="ai-recommendation-form">
           <input
             type="text"
             placeholder="What is in your mind for your next trip?"
             value={personalQuery}
-            onChange={(e) => setPersonalQuery(e.target.value)}
+            onChange={(e) => {setRecommendationResponse(null); setPersonalQuery(e.target.value)}}
             // className="search-input"
           />
           <button 
           onClick={getPersonalizedRecommendation}
           className="ai-recommendation-button">{recommendationResponse ? "Clear":"Search"}</button>
           </section>
+          {recommendationResponse && recommendationResponse.status == "ok" && (
+          <section className="ai-recommendation-reply">
+            <p>{recommendationResponse.content.reply}</p>
+          </section>)}
          </div>
       </div>
 
@@ -241,11 +248,12 @@ function Packages() {
 
         {/* Main Content */}
         <main className="packages-main">
+          {!loading && 
           <div className="results-info">
             <span className="result-count">
               {filteredPackages.length} package{filteredPackages.length !== 1 ? "s" : ""} found
             </span>
-          </div>
+          </div>}
 
           {loading ? (
             <div className="loading">Loading packages...</div>
