@@ -3,7 +3,8 @@ import cors from "cors"
 import dotenv from "dotenv"
 import axios from "axios"
 import { createRequire } from 'module'
-import { callGroqGenerate } from "./aireply.js"
+import { callGroqGenerate } from "./ai-reply.js"
+import { aiRecommendation } from "./ai-recommendation.js"
 
 dotenv.config()
 
@@ -126,6 +127,26 @@ app.post('/api/ai/reply', express.json(), async (req, res) => {
     }
 
     const result = await callGroqGenerate(prompt);
+    // Forward the provider response as-is. Adjust if you want a different shape.
+    res.json(result);
+  } catch (err) {
+    const message = err && err.message ? err.message : 'Unknown error';
+    const details = err && err.details ? err.details : undefined;
+    res.status(500).json({ ok: false, error: message, details });
+  }
+});
+
+app.post('/api/ai/recommendation', express.json(), async (req, res) => {
+  try {
+    // console.log("Request Body", req);
+    // console.log("Request Body", req.body);
+    const { prompt } = req.body || {};
+    console.log("prompt", prompt);
+    if (!prompt || typeof prompt !== 'string') {
+      return res.status(400).json({ error: 'Missing or invalid "prompt" in request body' });
+    }
+
+    const result = await aiRecommendation(prompt);
     // Forward the provider response as-is. Adjust if you want a different shape.
     res.json(result);
   } catch (err) {
