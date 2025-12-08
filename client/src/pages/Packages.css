@@ -6,8 +6,56 @@
 .page-header {
   background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
   color: white;
-  padding: 48px 0;
+  padding: 20px 0;
   text-align: center;
+}
+
+.ai-recommendation-container {
+  padding: 10px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-recommendation-container h4 {
+  margin-left: 7%;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.ai-recommendation-container input {
+  width: 80%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  transition: border-color 0.3s ease;
+  margin-right: 4px;
+}
+
+.ai-recommendation-container input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.ai-recommendation-button {
+  padding: 10px 16px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.ai-recommendation-button:hover {
+  background-color: #b84e30;
 }
 
 .page-header h1 {

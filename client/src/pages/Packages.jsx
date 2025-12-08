@@ -9,6 +9,8 @@ function Packages() {
   const [filteredPackages, setFilteredPackages] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [personalQuery, setPersonalQuery] = useState("");
+  const [recommendationResponse, setRecommendationResponse] = useState(null);
 
   // Filter states
   const [selectedTags, setSelectedTags] = useState([])
@@ -88,6 +90,34 @@ function Packages() {
     setPriceRange([0, 100000])
   }
 
+  const getPersonalizedRecommendation = async () => {
+    // Function to get AI recommendation based on personalQuery
+    if(personalQuery.trim() === "" || recommendationResponse) {
+      setPersonalQuery("");
+      setRecommendationResponse(null);
+      return;
+    }
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+      const response = await fetch(`${apiBaseUrl}/api/ai/recommendation`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: personalQuery }),
+      });
+
+      if (!response.ok) throw new Error("Failed to get recommendation")
+
+      const data = await response.json();
+      setRecommendationResponse(data);
+      console.log("AI Recommendation:", data);
+    } catch (err) {
+      console.error("Error getting AI recommendation:", err)
+      setRecommendationResponse({ error: err.message });
+    }
+  }
+
   // Extract unique locations and tags
   const uniqueLocations = [...new Set(allPackages.map((pkg) => pkg.location))]
   const uniqueTags = [...new Set(allPackages.flatMap((pkg) => pkg.tags))]
@@ -100,6 +130,21 @@ function Packages() {
           <h1>Explore Our Packages</h1>
           <p>Find your perfect travel destination</p>
         </div>
+        <div className="ai-recommendation-container">
+          <h4>Get Personalized Recommendation</h4>
+          <section>
+          <input
+            type="text"
+            placeholder="What is in your mind for your next trip?"
+            value={personalQuery}
+            onChange={(e) => setPersonalQuery(e.target.value)}
+            // className="search-input"
+          />
+          <button 
+          onClick={getPersonalizedRecommendation}
+          className="ai-recommendation-button">{recommendationResponse ? "Clear":"Search"}</button>
+          </section>
+         </div>
       </div>
 
       <div className="container packages-container">
