@@ -1,6 +1,7 @@
 // The user will enter their plan in natural language and this ai-recommendation system will recommend some packages based on that
 import express from "express";
 import dotenv from "dotenv";
+import axios from "axios";
 
 'use strict';
 
@@ -8,10 +9,26 @@ const app = express.Router();
 
 // Configuration via environment
 dotenv.config();
+const GAS_URL = process.env.GAS_DATA_URL;
 const GROQ_API_URL = process.env.GROQ_API_URL || 'https://api.groq.com/v1/generate';
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const DEFAULT_MODEL = process.env.GROQ_MODEL || 'groq-gen-1';
 // Helper to call Groq Gen AI API
+async function fetchPackagesByTags(tags){
+  if(tags.length == 0 || !Array.isArray(tags)){
+    throw new Error("Invalid Tags Array!");
+  }
+
+  try{
+    console.log(tags);
+    const resp = await axios.post(GAS_URL, {action:"filterPackagesByTags", tags: tags})
+    console.log("Packages from the fn", resp.data);
+    return resp.data.packages;
+  }catch(error){
+    console.error("Error fetching from GAS:", error.message)
+    throw new Error("Failed to fetch data from Google Apps Script")
+  }
+}
 async function aiRecommendation(prompt) {
   if (!GROQ_API_KEY) {
     throw new Error('GROQ_API_KEY not set in environment');
@@ -57,9 +74,14 @@ async function aiRecommendation(prompt) {
   if (json && Array.isArray(json.choices) && json.choices[0] && json.choices[0].message) {
     const msg = json.choices[0].message;
     // console.log("message: ", msg);
+    const tags = JSON.parse(msg.content).tags;
+    // console.log("tags: ", tags);
+    const packages = await fetchPackagesByTags(tags);
+    const reply = JSON.parse(msg.content).reply;
+    console.log("packages: ", packages, "reply: ", reply);
     formatted_response = {
       status: "ok",
-      content: typeof msg.content === 'string' ? JSON.parse(msg.content) : null,
+      content: packages && reply ? {packages, reply} : null,
     };
   } else {
     formatted_response = { ok: Boolean(json && json.ok)};
