@@ -23,6 +23,12 @@ function Packages() {
   }, [])
 
   useEffect(() => {
+    if(personalQuery.trim() === ""){
+      fetchAllPackages();
+    }
+  }, [personalQuery])
+
+  useEffect(() => {
     applyFilters()
   }, [allPackages, selectedTags, selectedLocations, searchQuery, priceRange])
 
