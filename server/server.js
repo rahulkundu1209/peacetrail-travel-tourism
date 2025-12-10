@@ -2,9 +2,9 @@ import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import axios from "axios"
-import { createRequire } from 'module'
 import { callGroqGenerate } from "./ai-reply.js"
 import { aiRecommendation } from "./ai-recommendation.js"
+import { generateOTP } from "./otp-verification.js"
 
 dotenv.config()
 
@@ -155,6 +155,21 @@ app.post('/api/ai/recommendation', express.json(), async (req, res) => {
     res.status(500).json({ ok: false, error: message, details });
   }
 });
+
+app.post('/api/otp/generate', express.json(), async (req, res) => {
+  try{
+    const {email} = req.body;
+    let regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if(!email || !regex.test(email)){
+      return res.status(400).json({error: "Invalid email address"});
+    }
+
+    const result = await generateOTP(email);
+    res.json(result);
+  } catch(error){
+    res.status(500).json({ error: error.message });
+  }
+})
 
 // Health check endpoint
 app.get("/health", (req, res) => {
