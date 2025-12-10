@@ -4,7 +4,7 @@ import dotenv from "dotenv"
 import axios from "axios"
 import { callGroqGenerate } from "./ai-reply.js"
 import { aiRecommendation } from "./ai-recommendation.js"
-import { generateOTP } from "./otp-verification.js"
+import { generateOTP, verifyOTP } from "./otp-verification.js"
 
 dotenv.config()
 
@@ -165,7 +165,35 @@ app.post('/api/otp/generate', express.json(), async (req, res) => {
     }
 
     const result = await generateOTP(email);
-    res.json(result);
+    if(result.status == "success"){
+      res.status(200).json({message: "OTP Sent"});
+    }else{
+      res.status(500).json({message: result.message});
+    }
+  } catch(error){
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.post('/api/otp/verify', express.json(), async (req, res) => {
+  try{
+    const {email, otp} = req.body;
+    let regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if(!email || !regex.test(email)){
+      return res.status(400).json({error: "Invalid email address"});
+    }
+    if(!otp){
+      return res.status(400).json({error: "Please enter a OTP"});
+    }
+
+    const result = await verifyOTP(email, otp);
+    if(result.status == "success"){
+      res.status(200).json({message: result.message});
+    }else if(result.status == "invalid"){
+      res.status(401).json({message: result.message});
+    }else{
+      res.status(500).json({message: result.message});
+    }
   } catch(error){
     res.status(500).json({ error: error.message });
   }

@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const MAIL_PASSWORD = process.env.MAIL_PASSWORD;
+const uri = `mongodb+srv://kundurahul968:${DB_PASSWORD}@cluster0.ftdbemt.mongodb.net/?appName=Cluster0`;
 const generateOTP = async (email) => {
   // Generate a 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -12,7 +13,6 @@ const generateOTP = async (email) => {
   // console.log(otp);
 
   // Store the OTP in MongoDB
-  const uri = `mongodb+srv://kundurahul968:${DB_PASSWORD}@cluster0.ftdbemt.mongodb.net/?appName=Cluster0`;
   const client = new MongoClient(uri, {
     serverApi: {
       version: ServerApiVersion.v1,
@@ -57,12 +57,12 @@ const generateOTP = async (email) => {
         return {status: "success"};
       } catch (error) {
         console.log(error);
-        return {status: "fail"};
+        return {status: "fail", message: "Failed to send OTP!"};
       }
     }
   } catch (err) {
     console.log("Error: ", err.message);
-    return {status: "fail"};
+    return {status: "fail", message: "Failed to save OTP!"};
   } finally {
     await client.close();
   }
@@ -70,4 +70,38 @@ const generateOTP = async (email) => {
   // Send the OTP to user's email
 };
 
-export { generateOTP };
+const verifyOTP = async (email, otp) =>{
+  //Fetch the document from db
+  const client = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    },
+  });
+  try{
+    const database = client.db("peace-trail");
+    const collection = database.collection("otp-verification");
+    const doc = await collection.findOne({_id: email});
+    console.log(doc);
+    const currentTime = new Date();
+    const generateTime = new Date(doc.time);
+    console.log(currentTime - generateTime);
+    if(currentTime - generateTime > 5*60*1000){
+      return {status: "invalid", message: "OTP Expired"};
+    }else if(otp != doc.otp){
+      return {status: "invalid", message: "Wrong OTP"};
+    }else if(otp == doc.otp){
+      return {status: "success", message: "OTP Verified"};
+    }else{
+      return {status: "fail", message: "Unknown Error"};
+    }
+  }catch(error){
+    console.log(error.message);
+    return {status: "fail", message: error.message}
+  }
+
+  //Verify the OTP and send the verification status
+}
+
+export { generateOTP, verifyOTP };
