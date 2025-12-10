@@ -119,7 +119,7 @@ function Packages() {
       const data = await response.json();
       setRecommendationResponse(data);
       setAllPackages(data.content.packages);
-      // console.log("AI Recommendation:", data);
+      console.log("AI Recommendation:", data);
     } catch (err) {
       console.error("Error getting AI recommendation:", err)
       setRecommendationResponse({ error: err.message });
