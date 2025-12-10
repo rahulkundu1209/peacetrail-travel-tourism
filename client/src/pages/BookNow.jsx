@@ -20,6 +20,8 @@ const BookNow = () => {
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [verified, setVerified] = useState(false);
   const [enteredOTP, setEnteredOTP] = useState("");
+  const [bookingError, setBookingError] = useState(null);
+  const [otpSentAck, setOtpSentAck] = useState(null);
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
@@ -47,6 +49,7 @@ const BookNow = () => {
 
   const handleContinueBooking = (e) => {
     e.preventDefault();
+    setBookingError(null);
 
     if (
       !formData.name ||
@@ -55,7 +58,7 @@ const BookNow = () => {
       !formData.tourDate ||
       !formData.persons
     ) {
-      alert("Please fill all the required fields.");
+      setBookingError("Please fill all the required fields.");
       return;
     }
 
@@ -63,14 +66,12 @@ const BookNow = () => {
       ...formData,
       packageId: pkg.id,
     });
-    const res = sendOTP(formData.email);
-    if(res){
-      setShowOTPVerification(true);
-    }
+    sendOTP(formData.email);
   };
 
   const sendOTP = async (email) =>{
     // call api to send otp
+    setOtpSentAck(null);
     if(!email){
       return;
     }
@@ -78,10 +79,11 @@ const BookNow = () => {
       email: email
     });
     if(response.status != 200){
-      window.alert("Failed to send OTP!");
+      setBookingError("Failed to send OTP!");
       return;
     }
-    return true;
+    setShowOTPVerification(true);
+    setOtpSentAck("OTP sent to your email.");
   }
 
   const verifyOTP = async (email, otp) =>{
@@ -96,6 +98,10 @@ const BookNow = () => {
     console.log("verifyOTP", response.data);
     if(response.data.message == "OTP Verified"){
       setVerified(true);
+      setOtpSentAck(null);
+      return;
+    }else{
+      setBookingError(response.data.message);
       return;
     }
     
@@ -103,16 +109,22 @@ const BookNow = () => {
 
   const resendOTPHandler = (e) =>{
     e.preventDefault();
-    sendOTP(enteredOTP);
+    setBookingError(null);
+    if(!formData.email){
+      setBookingError("Email is missing!");
+      return;
+    }
+    sendOTP(formData.email);
   }
 
   const verifyOTPHandler = (e) =>{
+    setBookingError(null);
     e.preventDefault();
     if(enteredOTP.length != 6){
-      console.log("Invalid OTP!");
+      setBookingError("Please enter a valid 6-digit OTP!");
       return;
     }else if(!formData.email){
-      console.log("Invalid OTP!");
+      setBookingError("Email is missing!");
       return;
     }
     verifyOTP(formData.email, enteredOTP);
@@ -316,6 +328,8 @@ const BookNow = () => {
                   </button>
                 </div>
               )}
+              {bookingError && <p className="error-message">{bookingError}</p>}
+              {otpSentAck && <p className="success-message">{otpSentAck}</p>}
             </div>
 
             {/* Right Column - Booking Card */}
