@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./BookNow.css";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from 'axios';
 
 const BookNow = () => {
   const { id } = useParams();
@@ -20,6 +21,7 @@ const BookNow = () => {
   const [verified, setVerified] = useState(false);
   const [enteredOTP, setEnteredOTP] = useState("");
 
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
     fetchPackageDetails();
   }, [id]);
@@ -27,7 +29,6 @@ const BookNow = () => {
   const fetchPackageDetails = async () => {
     try {
       setLoading(true);
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
       const response = await fetch(`${apiBaseUrl}/api/packages/${id}`);
 
       if (!response.ok) throw new Error("Package not found");
@@ -62,17 +63,59 @@ const BookNow = () => {
       ...formData,
       packageId: pkg.id,
     });
-    setShowOTPVerification(true);
-
-    
+    const res = sendOTP(formData.email);
+    if(res){
+      setShowOTPVerification(true);
+    }
   };
 
-  const otpVerificationHandler = async () =>{
-    // call api to verify otp
+  const sendOTP = async (email) =>{
+    // call api to send otp
+    if(!email){
+      return;
+    }
+    const response = await axios.post(`${apiBaseUrl}/api/otp/generate`, {
+      email: email
+    });
+    if(response.status != 200){
+      window.alert("Failed to send OTP!");
+      return;
+    }
+    return true;
   }
 
-  const sendOTPHandler = async () =>{
-    // call api to send otp
+  const verifyOTP = async (email, otp) =>{
+    // call api to verify otp
+    if(!email || !otp){
+      return;
+    }
+    const response = await axios.post(`${apiBaseUrl}/api/otp/verify`, {
+      email: email,
+      otp: enteredOTP
+    });
+    console.log("verifyOTP", response.data);
+    if(response.data.message == "OTP Verified"){
+      setVerified(true);
+      return;
+    }
+    
+  }
+
+  const resendOTPHandler = (e) =>{
+    e.preventDefault();
+    sendOTP(enteredOTP);
+  }
+
+  const verifyOTPHandler = (e) =>{
+    e.preventDefault();
+    if(enteredOTP.length != 6){
+      console.log("Invalid OTP!");
+      return;
+    }else if(!formData.email){
+      console.log("Invalid OTP!");
+      return;
+    }
+    verifyOTP(formData.email, enteredOTP);
   }
 
   if (loading) {
@@ -211,7 +254,6 @@ const BookNow = () => {
               ) : !verified ? (
                 <form
                   className="booking-form-wrapper"
-                  onSubmit={(e) => handleSendOTP(e)}
                 >
                   <h2>Verify Your Email</h2>
                   <div className="form-group">
@@ -239,11 +281,11 @@ const BookNow = () => {
                       required
                     />
                   </div>
-                  <button onClick={sendOTPHandler}>
+                  <button onClick={resendOTPHandler}>
                     Resend OTP
                   </button>
                   <div>
-                    <button onClick={otpVerificationHandler} type="submit" className="btn btn-primary form-submit">
+                    <button onClick={verifyOTPHandler} className="btn btn-primary form-submit">
                       Verify OTP
                     </button>
                     <button
@@ -257,7 +299,21 @@ const BookNow = () => {
                 </form>
               ) : (
                 <div>
-                  OTP Verified
+                  {/* Display the Booking Details for Confirmation and Proceed to Pay */}
+                  <h2>Booking Details</h2>
+                  <p><strong>Package:</strong> {pkg.name}</p>
+                  <p><strong>Name:</strong> {bookingInformation.name}</p>
+                  <p><strong>Mobile:</strong> {bookingInformation.mobile}</p>
+                  <p><strong>Email:</strong> {bookingInformation.email}</p>
+                  <p><strong>Tour Date:</strong> {bookingInformation.tourDate}</p>
+                  <p><strong>Number of Persons:</strong> {bookingInformation.persons}</p>
+                  <p><strong>Total Amount: </strong>₹{(pkg.price*bookingInformation.persons).toLocaleString()}</p>
+                  <button 
+                  className="btn btn-primary form-submit"
+                    // onClick={bookingHandler}
+                  >
+                    Proceed to Pay
+                  </button>
                 </div>
               )}
             </div>
