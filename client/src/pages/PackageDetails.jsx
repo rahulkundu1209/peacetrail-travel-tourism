@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, Link } from "react-router-dom"
 import "./PackageDetails.css"
 
 function PackageDetails() {
@@ -171,7 +171,9 @@ function PackageDetails() {
               </div>
 
               <div className="action-buttons">
-                <button className="btn btn-primary btn-full">Book Now</button>
+                <Link 
+                 to={`/book-now/${pkg.id}`}
+                 className="btn btn-primary btn-full">Book Now</Link>
                 <button className="btn btn-outline btn-full">Ask Questions</button>
               </div>
 

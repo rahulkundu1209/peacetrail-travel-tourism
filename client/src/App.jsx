@@ -5,6 +5,7 @@ import Landing from "./pages/Landing"
 import Packages from "./pages/Packages"
 import PackageDetails from "./pages/PackageDetails"
 import "./App.css"
+import BookNow from "./pages/BookNow"
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/packages" element={<Packages />} />
             <Route path="/packages/:id" element={<PackageDetails />} />
+            <Route path="/book-now/:id" element={<BookNow />} />
           </Routes>
         </main>
         <Footer />
