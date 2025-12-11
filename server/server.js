@@ -5,6 +5,7 @@ import axios from "axios"
 import { callGroqGenerate } from "./ai-reply.js"
 import { aiRecommendation } from "./ai-recommendation.js"
 import { generateOTP, verifyOTP } from "./otp-verification.js"
+import { bookPackage } from "./pkg-book.js"
 
 dotenv.config()
 
@@ -196,6 +197,22 @@ app.post('/api/otp/verify', express.json(), async (req, res) => {
     }
   } catch(error){
     res.status(500).json({ error: error.message });
+  }
+})
+
+app.post('/api/pkg/book', express.json(), async(req, res)=>{
+  try{
+    const bookingDetails = req.body;
+    console.log("bookingDetails", bookingDetails);
+    if(!bookingDetails){
+      res.status(400).json({error: "Invalid booking details"});
+    }
+    const bookPkg = await bookPackage(bookingDetails);
+    console.log("bookpkg",bookPkg);
+    res.status(200).json({bookPkg: bookPkg});
+  }catch(error){
+    res.status(500).json({ error: error.message });
+    console.log(error);
   }
 })
 
