@@ -11,7 +11,7 @@ const BookNow = () => {
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
-    mobile: "",
+    phone: "",
     email: "",
     tourDate: "",
     persons: "",
@@ -22,6 +22,7 @@ const BookNow = () => {
   const [enteredOTP, setEnteredOTP] = useState("");
   const [bookingError, setBookingError] = useState(null);
   const [otpSentAck, setOtpSentAck] = useState(null);
+  const [bookingSuccess, setBookingSuccess] = useState(null);
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
@@ -53,7 +54,7 @@ const BookNow = () => {
 
     if (
       !formData.name ||
-      !formData.mobile ||
+      !formData.phone ||
       !formData.email ||
       !formData.tourDate ||
       !formData.persons
@@ -64,7 +65,10 @@ const BookNow = () => {
 
     setBookingInformation({
       ...formData,
+      tourDate: formData.tourDate.split("T")[0],
       packageId: pkg.id,
+      packageTitle: pkg.name,
+      price: pkg.price
     });
     sendOTP(formData.email);
   };
@@ -128,6 +132,28 @@ const BookNow = () => {
       return;
     }
     verifyOTP(formData.email, enteredOTP);
+  }
+
+  const bookingHandler = async (e) =>{
+    e.preventDefault();
+    setBookingError(null);
+    if(!verified){
+      setBookingError("Please verify your email first!");
+      return;
+    }
+    // proceed to book package
+    if(!bookingInformation){
+      setBookingError("Booking information is missing!");
+      return;
+    }
+    // console.log("bookingInformation", bookingInformation);
+    const response = await axios.post(`${apiBaseUrl}/api/pkg/book`, bookingInformation);
+    // console.log("bookingHandler", response.data);
+    if(response.status == 200 && response.data.bookPkg.status == "success"){
+      setBookingSuccess("Booking successful! We have sent you an email.");
+      setBookingError(null);
+      return;
+    }
   }
 
   if (loading) {
@@ -200,16 +226,16 @@ const BookNow = () => {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="mobile">Mobile Number</label>
+                    <label htmlFor="phone">Phone Number</label>
                     <input
                       type="tel"
-                      id="mobile"
-                      name="mobile"
+                      id="phone"
+                      name="phone"
                       className="form-input"
-                      placeholder="Enter your mobile number"
+                      placeholder="Enter your phone number"
                       required
-                      value={formData.mobile}
-                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     />
                   </div>
 
@@ -310,23 +336,32 @@ const BookNow = () => {
                   </div>
                 </form>
               ) : (
-                <div>
+                !bookingSuccess ? (<div>
                   {/* Display the Booking Details for Confirmation and Proceed to Pay */}
                   <h2>Booking Details</h2>
                   <p><strong>Package:</strong> {pkg.name}</p>
                   <p><strong>Name:</strong> {bookingInformation.name}</p>
-                  <p><strong>Mobile:</strong> {bookingInformation.mobile}</p>
+                  <p><strong>Phone:</strong> {bookingInformation.phone}</p>
                   <p><strong>Email:</strong> {bookingInformation.email}</p>
                   <p><strong>Tour Date:</strong> {bookingInformation.tourDate}</p>
                   <p><strong>Number of Persons:</strong> {bookingInformation.persons}</p>
                   <p><strong>Total Amount: </strong>₹{(pkg.price*bookingInformation.persons).toLocaleString()}</p>
                   <button 
                   className="btn btn-primary form-submit"
-                    // onClick={bookingHandler}
+                    onClick={bookingHandler}
                   >
                     Proceed to Pay
                   </button>
-                </div>
+                </div>) : (<div>
+                  <h2>Booking Successful!</h2>
+                  <p>{bookingSuccess}</p>
+                  <button
+                    onClick={() => navigate("/packages")}
+                    className="btn btn-primary"
+                  >
+                    Back to Packages
+                  </button>
+                </div>)
               )}
               {bookingError && <p className="error-message">{bookingError}</p>}
               {otpSentAck && <p className="success-message">{otpSentAck}</p>}
